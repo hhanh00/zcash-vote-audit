@@ -1,9 +1,10 @@
-import { Button, Card, Label, TextInput } from "flowbite-react";
+import { Button, Card, Label, Spinner, TextInput } from "flowbite-react";
 import "./App.css";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { invoke } from "@tauri-apps/api/core";
 import { EChart } from "@kbox-labs/react-echarts";
 import { useState } from "react";
+import Swal from "sweetalert2";
 
 type AuditParams = {
   url: string;
@@ -16,6 +17,7 @@ type Count = {
 }
 
 function App() {
+  const [validating, setValidating] = useState(false)
   const [results, setResults] = useState<Count[]>([])
   const { control, handleSubmit } = useForm({
     defaultValues: {
@@ -28,9 +30,22 @@ function App() {
     console.log(params);
 
     (async () => {
-      const res: Count[] = await invoke('audit', params)
-      console.log(res)
-      setResults(res)
+      try {
+        setValidating(true)
+        const res: Count[] = await invoke('audit', params)
+        console.log(res)
+        setResults(res)
+      }
+      catch (e: any) {
+        await Swal.fire(
+          {
+            icon: "error",
+            title: e
+          })
+      }
+      finally {
+        setValidating(false)
+      }
     })()
   }
 
@@ -39,6 +54,12 @@ function App() {
 
   return (
     <main>
+      {validating && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <Spinner color="info" size="xl" />
+        </div>
+      )}
+
       {results.length == 0 && <form className="flex justify-center items-center bg-gray-100" onSubmit={handleSubmit(onSubmit)}>
         <Card className="w-full max-w-md">
           <h2 className="text-2xl font-bold mb-4 text-center">Election Audit</h2>
@@ -72,33 +93,34 @@ function App() {
         </Card>
       </form>}
       <EChart
-          renderer={'svg'}
-          onClick={() => console.log('clicked!')}
-          style={{
-            height: '600px',
-            width: '100%'
-          }}
-          xAxis={{
-            type: 'category',
-            data: labels
-          }}
-          yAxis={{
-            type: 'value'
-          }}
-          series={[
-            {
-              data: votes,
-              type: 'bar',
-              showBackground: true,
-              backgroundStyle: {
-                color: 'rgba(180, 180, 180, 0.2)'
-              },
-              label: {
-                show: true,
-                position: 'inside'
-              }            }
-          ]}
-        />
+        renderer={'svg'}
+        onClick={() => console.log('clicked!')}
+        style={{
+          height: '600px',
+          width: '100%'
+        }}
+        xAxis={{
+          type: 'category',
+          data: labels
+        }}
+        yAxis={{
+          type: 'value'
+        }}
+        series={[
+          {
+            data: votes,
+            type: 'bar',
+            showBackground: true,
+            backgroundStyle: {
+              color: 'rgba(180, 180, 180, 0.2)'
+            },
+            label: {
+              show: true,
+              position: 'inside'
+            }
+          }
+        ]}
+      />
     </main>
   );
 }
