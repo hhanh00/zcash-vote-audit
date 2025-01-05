@@ -25,7 +25,7 @@ bip0039 = "0.9.0"
 orchard = "0.3.0"
 reqwest = { version = "0.11.27", features = ["json"] }
 pasta_curves = "0.5.1"
-zcash-vote = {git = "https://github.com/hhanh00/zcash-vote.git", rev="833c596"}
+zcash-vote = {git = "https://github.com/hhanh00/zcash-vote.git", rev="b266801"}
 
 [patch.crates-io]
 orchard = {git = "https://github.com/hhanh00/orchard.git", rev="e7abba7"}
