@@ -3,9 +3,15 @@ use std::collections::BTreeSet;
 use anyhow::Error;
 use bip0039::Mnemonic;
 use orchard::keys::{FullViewingKey, PreparedIncomingViewingKey, Scope, SpendingKey};
-use serde::{Deserialize, Serialize};
-use zcash_vote::{address::VoteAddress, as_byte256, ballot::{Ballot, BallotData}, election::OrchardHash, validate::{try_decrypt_ballot, validate_ballot}, Election};
 use pasta_curves::{group::ff::PrimeField, Fp};
+use serde::{Deserialize, Serialize};
+use zcash_vote::{
+    address::VoteAddress,
+    as_byte256,
+    ballot::{Ballot, BallotData},
+    election::{Election, OrchardHash},
+    validate::{try_decrypt_ballot, validate_ballot},
+};
 
 #[derive(Clone, Debug)]
 pub struct Count(PreparedIncomingViewingKey, u64);
@@ -40,12 +46,23 @@ async fn audit(url: String, seed: String) -> Result<Vec<CountResult>, String> {
         let mut cmx_roots = BTreeSet::<Fp>::new();
         cmx_roots.insert(Fp::from_repr(election.cmx.0).unwrap());
         let mut nfs = BTreeSet::<Fp>::new();
-        let n = reqwest::get(&format!("{url}/num_ballots")).await?.text().await?;
+        let n = reqwest::get(&format!("{url}/num_ballots"))
+            .await?
+            .text()
+            .await?;
         let n = n.parse::<u32>()?;
         for i in 1..=n {
             println!("{i}");
-            let ballot: Ballot = reqwest::get(&format!("{url}/ballot/height/{i}")).await?.json().await?;
-            let BallotData { version, domain, actions, anchors } = ballot.data.clone();
+            let ballot: Ballot = reqwest::get(&format!("{url}/ballot/height/{i}"))
+                .await?
+                .json()
+                .await?;
+            let BallotData {
+                version,
+                domain,
+                actions,
+                anchors,
+            } = ballot.data.clone();
             if version != 1 {
                 anyhow::bail!("Invalid version");
             }
@@ -77,9 +94,14 @@ async fn audit(url: String, seed: String) -> Result<Vec<CountResult>, String> {
 
             validate_ballot(ballot, election.signature_required)?;
         }
-        let res = counts.iter().zip(election.candidates.iter()).map(|(c, cc)| {
-            CountResult { choice: cc.choice.clone(), amount: c.1 }
-        }).collect::<Vec<_>>();
+        let res = counts
+            .iter()
+            .zip(election.candidates.iter())
+            .map(|(c, cc)| CountResult {
+                choice: cc.choice.clone(),
+                amount: c.1,
+            })
+            .collect::<Vec<_>>();
         Ok::<_, Error>(res)
     };
 
