@@ -19,8 +19,8 @@ function App() {
   const [results, setResults] = useState<Count[]>([])
   const { control, handleSubmit } = useForm({
     defaultValues: {
-      url: 'http://localhost:8000/election/nba-finals',
-      seed: 'broom ugly valve manual relief basket skill brush outer basic museum catalog fun monitor almost kick easy seek myth token jeans slogan clean eternal',
+      url: '',
+      seed: '',
     },
   })
 
