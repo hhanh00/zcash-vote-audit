@@ -2,15 +2,13 @@ use std::collections::BTreeSet;
 
 use anyhow::Error;
 use bip0039::Mnemonic;
-use orchard::keys::{FullViewingKey, PreparedIncomingViewingKey, Scope, SpendingKey};
+use orchard::{keys::{FullViewingKey, PreparedIncomingViewingKey, Scope, SpendingKey}, vote::{try_decrypt_ballot, validate_ballot, Ballot, BallotData, OrchardHash}};
 use pasta_curves::{group::ff::PrimeField, Fp};
 use serde::{Deserialize, Serialize};
 use zcash_vote::{
     address::VoteAddress,
     as_byte256,
-    ballot::{Ballot, BallotData},
-    election::{Election, OrchardHash},
-    validate::{try_decrypt_ballot, validate_ballot},
+    election::{Election, BALLOT_VK},
 };
 
 #[derive(Clone, Debug)]
@@ -67,7 +65,7 @@ async fn audit(url: String, seed: String) -> Result<Vec<CountResult>, String> {
                 anyhow::bail!("Invalid version");
             }
             let domain = Fp::from_repr(as_byte256(&domain)).unwrap();
-            if domain != election.domain().0 {}
+            if domain != election.domain() {}
             let nf = &anchors.nf;
             if nf != &election.nf.0 {
                 anyhow::bail!("nf roots do not match");
@@ -92,7 +90,7 @@ async fn audit(url: String, seed: String) -> Result<Vec<CountResult>, String> {
             }
             cmx_roots.insert(Fp::from_repr(frontier.root()).unwrap());
 
-            validate_ballot(ballot, election.signature_required)?;
+            validate_ballot(ballot, election.signature_required, &BALLOT_VK)?;
         }
         let res = counts
             .iter()
