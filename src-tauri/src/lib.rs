@@ -50,7 +50,6 @@ async fn audit(url: String, seed: String) -> Result<Vec<CountResult>, String> {
             .await?;
         let n = n.parse::<u32>()?;
         for i in 1..=n {
-            println!("{i}");
             let ballot: Ballot = reqwest::get(&format!("{url}/ballot/height/{i}"))
                 .await?
                 .json()
