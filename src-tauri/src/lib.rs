@@ -12,7 +12,7 @@ use zcash_vote::{
 };
 
 #[derive(Clone, Debug)]
-pub struct Count(PreparedIncomingViewingKey, u64);
+pub struct Count(PreparedIncomingViewingKey, FullViewingKey, u64);
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct CountResult {
@@ -37,9 +37,10 @@ async fn audit(url: String, seed: String) -> Result<Vec<CountResult>, String> {
             }
             let ivk = fvk.to_ivk(Scope::External);
             let pivk = PreparedIncomingViewingKey::new(&ivk);
-            counts.push(Count(pivk, 0u64));
+            counts.push(Count(pivk, fvk, 0u64));
         }
 
+        let mut candidate_nfs = vec![];
         let mut frontier = election.cmx_frontier.clone().unwrap();
         let mut cmx_roots = BTreeSet::<Fp>::new();
         cmx_roots.insert(Fp::from_repr(election.cmx.0).unwrap());
@@ -83,7 +84,9 @@ async fn audit(url: String, seed: String) -> Result<Vec<CountResult>, String> {
                 frontier.append(OrchardHash(as_byte256(&action.cmx)));
                 for c in counts.iter_mut() {
                     if let Some(note) = try_decrypt_ballot(&c.0, action)? {
-                        c.1 += note.value().inner();
+                        let candidate_nf = note.nullifier_domain(&c.1, domain);
+                        candidate_nfs.push(Fp::from_repr(candidate_nf.to_bytes()).unwrap());
+                        c.2 += note.value().inner();
                     }
                 }
             }
@@ -91,12 +94,20 @@ async fn audit(url: String, seed: String) -> Result<Vec<CountResult>, String> {
 
             validate_ballot(ballot, election.signature_required, &BALLOT_VK)?;
         }
+
+        // Check that candidate notes are unspent
+        for dnf in candidate_nfs.iter() {
+            if nfs.contains(dnf) {
+                anyhow::bail!("candidate notes cannot be spent");
+            }
+        }
+
         let res = counts
             .iter()
             .zip(election.candidates.iter())
             .map(|(c, cc)| CountResult {
                 choice: cc.choice.clone(),
-                amount: c.1,
+                amount: c.2,
             })
             .collect::<Vec<_>>();
         Ok::<_, Error>(res)
