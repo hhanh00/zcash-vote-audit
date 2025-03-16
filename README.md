@@ -25,7 +25,7 @@ with the voting blockchain.
 
 ## Local Vote Server
 
-1. See the zcash-vote server project[2] for information
+1. See the [zcash-vote server project][2] for information
 on how to install and run the zcash-vote server.
 2. You should generate your own node key but
 use the `genesis.json` file from the election.
