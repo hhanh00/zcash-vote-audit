@@ -25,7 +25,7 @@ with the voting blockchain.
 
 ## Local Vote Server
 
-1. See the [zcash-vote server project][server] for information
+1. See the [zcash-vote server project](https://github.com/hhanh00/zcash-vote-server/blob/main/doc/deploy.md) for information
 on how to install and run the zcash-vote server.
 2. You should generate your own node key but
 use the `genesis.json` file from the election.
@@ -42,4 +42,3 @@ of the local server, i.e. `http://localhost:8000/election/<id>`
 --
 [^1]: It checks the signatures, the ZKP
 and that candidate votes were not redirected.
-[server]: https://github.com/hhanh00/zcash-vote-server/blob/main/doc/deploy.md
