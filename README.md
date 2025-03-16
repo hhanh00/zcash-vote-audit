@@ -39,6 +39,5 @@ download and validate ballots locally.
 6. Finally, run `zcash-vote-audit` with the URL
 of the local server, i.e. `http://localhost:8000/election/<id>`
 
---
 [^1]: It checks the signatures, the ZKP
 and that candidate votes were not redirected.
