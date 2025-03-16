@@ -13,10 +13,10 @@ If the tool is used with a public/official
 vote server, the audit *trusts* the correctness
 of the ballots it gets. Ballots cannot be
 forged because of the ZKP and signatures they
-contain, but a vote server may be omitting
+contain, but a vote server may be *omitting*
 certain ballots.
 
-Therefore, auditors are highly recommended
+Therefore, auditors are *highly recommended*
 to deploy and use their own vote server.
 This guarantees that the ballots they have
 are the complete set. The BFT
@@ -25,7 +25,7 @@ with the voting blockchain.
 
 ## Local Vote Server
 
-1. See the zcash-vote server for information
+1. See the zcash-vote server project[2] for information
 on how to install and run the zcash-vote server.
 2. You should generate your own node key but
 use the `genesis.json` file from the election.
@@ -42,3 +42,4 @@ of the local server, i.e. `http://localhost:8000/election/<id>`
 --
 [^1]: It checks the signatures, the ZKP
 and that candidate votes were not redirected.
+[2]: https://github.com/hhanh00/zcash-vote-server/blob/main/doc/deploy.md
